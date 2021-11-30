@@ -1,0 +1,619 @@
+<?xml version="1.0" encoding="utf-8"?>
+<modification>
+  <name>HP Custom Print Request</name>
+  <code>HPCustomPrintRequest</code>
+  <version>1.0.0</version>
+  <author>Hp Web Design</author>
+  <link>https://hpwebdesign.id</link>
+  
+  <file path="admin/controller/catalog/product.php">
+    <operation>
+      <search><![CDATA[if (isset($this->request->post['price'])) {]]></search>
+      <add position="before"><![CDATA[
+      if (isset($this->request->post['price_m'])) {
+			$data['price_m'] = $this->request->post['price_m'];
+		} elseif (!empty($product_info)) {
+			$data['price_m'] = $product_info['price_m'];
+		} else {
+			$data['price_m'] = '';
+		}
+		if (isset($this->request->post['time_m'])) {
+			$data['time_m'] = $this->request->post['time_m'];
+		} elseif (!empty($product_info)) {
+			$data['time_m'] = $product_info['time_m'] > 0 ? $product_info['time_m']  : 24;
+		} else {
+			$data['time_m'] = 24;
+		}
+		if (isset($this->request->post['custom_product_status'])) {
+			$data['custom_product_status'] = $this->request->post['custom_product_status'];
+		} elseif (isset($product_info['custom_product'])) {
+			$data['custom_product_status'] = $product_info['custom_product_status'];
+		} else {
+			$data['custom_product_status'] = '';
+		}
+		if (isset($this->error['time_m'])) {
+			$data['error_time_m'] = $this->error['time_m'];
+		} else {
+			$data['error_time_m'] = '';
+		}
+		if (isset($this->error['price_m'])) {
+			$data['error_price_m'] = $this->error['price_m'];
+		} else {
+			$data['error_price_m'] = '';
+		}
+		
+      ]]></add>
+    </operation>
+    <operation>
+      <search><![CDATA[if ((utf8_strlen($this->request->post['model']) < 1) || (utf8_strlen($this->request->post['model']) > 64)) {]]></search>
+      <add position="before"><![CDATA[
+      if (isset($this->request->post['custom_product_status']) && $this->request->post['custom_product_status']) {
+     if ($this->request->post['price_m'] < 1 || $this->request->post['price_m'] == '') {
+		$this->error['price_m'] = $this->language->get('error_price_m');
+		}
+		if ($this->request->post['time_m'] < 1 || $this->request->post['time_m'] == '') {
+		$this->error['time_m'] = $this->language->get('error_time_m');
+		}
+		
+		}
+      ]]></add>
+    </operation>
+    
+  </file>
+  <file path="admin/language/{en-gb,id-id}/catalog/product.php">
+    <operation>
+      <search><![CDATA[// Entry]]></search>
+      <add position="after"><![CDATA[
+      $_['entry_price_m']       = 'Price /m<sup>2</sup>';
+      $_['entry_time_m']          = 'Waktu Pengerjaan';
+      $_['error_price_m']       = 'Price /m<sup>2</sup> wajib diisi';
+      $_['error_time_m']          = 'Waktu Pengerjaan wajib diisi';
+      $_['entry_custom_product_status']  = 'Custom Product';
+      ]]></add>
+    </operation>
+    
+  </file>
+  <file path="admin/model/catalog/product.php">
+    <operation>
+      <search><![CDATA[if (isset($data['image'])) {]]></search>
+      <add position="before"><![CDATA[
+      if (isset($data['price_m'])) {
+        $this->db->query("UPDATE ".DB_PREFIX."product SET price_m = '".(float)$data['price_m']."' WHERE product_id = '".(int)$product_id."'");
+      }
+      if (isset($data['time_m'])) {
+        $this->db->query("UPDATE ".DB_PREFIX."product SET time_m = '".(float)$data['time_m']."' WHERE product_id = '".(int)$product_id."'");
+      }
+      if (isset($data['custom_product_status'])) {
+        $this->db->query("UPDATE ".DB_PREFIX."product SET custom_product_status = '".(int)$data['custom_product_status']."' WHERE product_id = '".(int)$product_id."'");
+      }
+      
+      ]]></add>
+    </operation>
+    
+  </file>
+  <file path="admin/view/template/catalog/product_form.twig">
+    <operation>
+      <search><![CDATA[<label class="col-sm-2 control-label" for="input-sku"><span data-toggle="tooltip" title="{{ help_sku }}">{{ entry_sku }}</span></label>]]></search>
+      <add position="before" offset="1"><![CDATA[
+       <div  class="form-group">
+                <label class="col-sm-2 control-label" for="input-price-m">{{ entry_custom_product_status }}</label>
+                <div class="col-sm-10">
+                  <input name="custom_product_status" type="checkbox" data-control="checkbox" value="1"
+										   data-off-label="Dinonaktifkan"
+										   data-on-label="Diaktifkan" {% if custom_product_status or price_m > 0 %} checked="checked" {% endif %}>
+                </div>
+              </div>
+        <div id="custom-product" style="display:{{ custom_product_status or price_m > 0 ? 'block' : 'none' }};">
+       <div  class="form-group">
+                <label class="col-sm-2 control-label" for="input-price-m">{{ entry_price_m }}</label>
+                <div class="col-sm-10">
+                  <input type="text" name="price_m" value="{{ price_m }}" placeholder="{{ entry_price_m }}" id="input-price-m" class="form-control" />
+                   {% if error_price_m %}
+                  <div class="text-danger">{{ error_price_m }}</div>
+                  {% endif %}
+                </div>
+              </div>
+              
+        <div class="form-group">
+                <label class="col-sm-2 control-label" for="input-time-m">{{ entry_time_m }}</label>
+                <div class="col-sm-2">
+                <div class="input-group">
+                  <input type="text" name="time_m" value="{{ time_m }}" placeholder="{{ entry_time_m }}" id="input-time-m" class="form-control" />
+                  <span class="input-group-btn"><button type="button" class="btn btn-default">Jam</button></span>
+                </div>
+                 {% if error_time_m %}
+                  <div class="text-danger">{{ error_time_m }}</div>
+                  {% endif %}
+                </div>
+              </div>
+        </div>
+      
+      ]]></add>
+    </operation>
+    <operation>
+      <search><![CDATA[{{ footer }}]]></search>
+      <add position="before"><![CDATA[
+       <script>
+       $(document).ready(function () {
+       if ($.fn.checkboxpicker) {
+			$('[data-control=checkbox]').checkboxpicker({onClass: 'btn-info'});
+		}
+		$('.btn-group .btn').addClass('btn-sm');
+       $("input[name='custom_product_status']").on('change', function(){
+        if ($(this).is(':checked')) {
+            $('#custom-product').show();
+            $("input[name='time_m']").val('{{ time_m }}');
+            $("input[name='price_m']").val('{{ price_m }}');
+            } else {
+            $('#custom-product').hide();
+            $("input[name='price_m']").val(0);
+            $("input[name='time_m']").val(0);
+            }
+       });
+       });
+       </script>
+      ]]></add>
+    </operation>
+    <operation>
+      <search><![CDATA[<div id="content">]]></search>
+      <add position="after"><![CDATA[<script src="view/javascript/bootstrap/js/bootstrap-checkbox.min.js" type="text/javascript"></script>]]></add>
+    </operation>
+  </file>
+  
+  <file path="admin/model/sale/order.php">
+    <operation>
+      <search><![CDATA[public function getOrder($order_id) {]]></search>
+      <add position="before"><![CDATA[
+       public function getChangePrice($order_id, $product_id) {
+		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "change_price WHERE order_id = '" . (int)$order_id . "' AND product_id = '" . (int)$product_id . "'");
+
+		return $query->row;
+	}
+      ]]></add>
+    </operation>
+    </file>
+    <file path="admin/controller/sale/order.php">
+    <operation>
+      <search><![CDATA[$data['products'][] = array(]]></search>
+      <add position="before"><![CDATA[
+       $change_price = $this->model_sale_order->getChangePrice($this->request->get['order_id'], $product['product_id']);
+       if ($change_price) {
+       $option_data[] = array(
+					'name'  => 'Panjang',
+					'value' => number_format($change_price['panjang'],2).' m',
+				    'type'  => 'text'
+				);
+		 $option_data[] = array(
+					'name'  => 'Lebar',
+					'value' => number_format($change_price['lebar'],2).' m',
+				    'type'  => 'text'
+				);
+		$option_data[] = array(
+					'name'  => 'Waktu Pengerjaan',
+					'value' => number_format($change_price['waktu']).' Jam',
+				    'type'  => 'text'
+				);
+       }
+      ]]></add>
+    </operation>
+    </file>
+  
+  <file path="catalog/controller/product/product.php">
+    <operation>
+      <search><![CDATA[$this->response->setOutput($this->load->view('product/product', $data));]]></search>
+      <add position="before"><![CDATA[
+       $data['price_m'] = $this->currency->format($this->tax->calculate($product_info['price_m'], $product_info['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
+       $data['time_m'] = number_format($product_info['time_m']);
+       $data['status_change_price'] = false;
+       if ($product_info['price_m'] > 0 && $product_info['time_m'] > 0) {
+        $data['status_change_price'] = true;
+       }
+      ]]></add>
+    </operation>
+    <operation>
+      <search><![CDATA[public function index() {]]></search>
+      <add position="before"><![CDATA[
+       public function changePrice() {
+       if (isset($this->request->post['product_id'])) {
+			$product_id = (int)$this->request->post['product_id'];
+		} else {
+			$product_id = 0;
+		}
+
+		$this->load->model('catalog/product');
+
+		$product_info = $this->model_catalog_product->getProduct($product_id);
+
+		if ($product_info) {
+			if (isset($this->request->post['jumlah'])) {
+				$jumlah = (int)$this->request->post['jumlah'];
+			} else {
+				$jumlah = 1;
+			}
+
+			if (isset($this->request->post['panjang'])) {
+				$panjang = (float)$this->request->post['panjang'];
+			} else {
+				$panjang = 1;
+			}
+			
+			if (isset($this->request->post['lebar'])) {
+				$lebar = (float)$this->request->post['lebar'];
+			} else {
+				$lebar = 1;
+			}
+			
+			$total_harga = (($panjang * $lebar) * $product_info['price_m']) * $jumlah;
+			$price = (($panjang * $lebar) * $product_info['price_m']);
+			$total_jam = (($panjang * $lebar) * $product_info['time_m']) * $jumlah;
+			$json['success'] = true;
+			$json['qty'] = $jumlah;
+			$json['price'] = $this->currency->format($this->tax->calculate($price, $product_info['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
+			$json['total'] = $this->currency->format($this->tax->calculate($total_harga, $product_info['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
+			$json['time'] = $total_jam;
+			
+		}
+		
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
+		
+		
+       }
+      ]]></add>
+    </operation>
+    
+  </file>
+  
+  
+  <file path="catalog/model/catalog/product.php">
+    <operation>
+      <search><![CDATA['product_id'       => $query->row['product_id'],]]></search>
+      <add position="after"><![CDATA[
+       'price_m'       => $query->row['price_m'],
+       'time_m'       => $query->row['time_m'],
+      ]]></add>
+    </operation>
+    
+  </file>
+   <file path="catalog/view/theme/*/template/product/product.twig">
+    <operation>
+      <search><![CDATA[{% if options %}]]></search>
+      <add position="before"><![CDATA[
+      {% if status_change_price %}
+      <div class="form-group required">
+					  <label class="control-label" for="input-option-panjang">Panjang</label>
+					  <div class="input-group">
+					  <input type="text" name="panjang" value="" placeholder="Panjang" id="panjang" class="form-control" onkeyup="changePrice();" />
+					   	<span class="input-group-btn">
+                     	<button type="button" class="btn btn-default">m</button>
+                             </span>
+					  </div>
+					</div>
+					 <div class="form-group required">
+					  <label class="control-label" for="input-option-panjang">Lebar</label>
+					  <div class="input-group">
+					  <input type="text" name="lebar" value="" placeholder="Lebar" id="lebar" class="form-control" onkeyup="changePrice();" />
+					   	<span class="input-group-btn">
+                     	<button type="button" class="btn btn-default" >m</button>
+                             </span>
+					  </div>
+					</div>
+					{% endif %}
+      ]]></add>
+    </operation>
+     <operation>
+      <search><![CDATA[<div class="box-cart clearfix">]]></search>
+      <add position="before"><![CDATA[
+       {% if status_change_price %}
+      <div class="box-cart table-responsive clearfix" id="table-price" style="display:none;">
+                	 <table class="table table-bordered">
+                	     <tr>
+                	     <td class="text-center">Harga/m<sup style="color:#474747;">2</sup></td>
+                	     <td class="text-center">{{ price_m }}</td>
+                	     </tr>
+                	     <tr>
+                	     <td class="text-center">Waktu Pengerjaan</td>
+                	     <td class="text-center" id="time-m">{{ time_m }} Jam</td>
+                	     </tr>
+                	     <tr>
+                	     <td class="text-center">Harga Barang</td>
+                	     <td class="text-center" id="price-m">{{ price_m }}</td>
+                	     </tr>
+                	     <tr>
+                	     <td class="text-center">Jumlah</td>
+                	     <td class="text-center"><input type="number" name="jumlah" class="form-control" value="{{ minimum }}" onkeyup="changePrice();"></td>
+                	     </tr>
+                	     <tr>
+                	     <td class="text-center">Total Harga</td>
+                	     <td class="text-center" id="total-harga">{{ price_m }}</td>
+                	     </tr>
+                	 </table>    
+                	</div>
+                	{% endif %}
+      ]]></add>
+    </operation>
+    <operation>
+      <search><![CDATA[if (json['error']['option']) {]]></search>
+      <add position="before"><![CDATA[
+      if (json['error']['panjang']) {
+        $('#panjang').parent().after('<div class="text-danger">' + json['error']['panjang'] + '</div>');
+      }
+       if (json['error']['lebar']) {
+        $('#lebar').parent().after('<div class="text-danger">' + json['error']['lebar'] + '</div>');
+      }
+      ]]></add>
+    </operation>
+    <operation>
+      <search><![CDATA[{{ footer }}]]></search>
+      <add position="before"><![CDATA[
+       {% if status_change_price %}
+      <script>
+      $('.quantity-control').hide();
+      function changePrice() {
+        if ($('#panjang').val() == ''){
+            return;
+        }
+        if ($('#lebar').val() == ''){
+            return;
+        }
+        if ($("input[name='jumlah']").val() == 0 || $("input[name='jumlah']").val() == ''){
+            return;
+        }
+        $.ajax({
+		url: 'index.php?route=product/product/changePrice',
+		type: 'post',
+		data: $('#table-price input[type=\'number\'], #product input[type=\'text\'], #product input[type=\'hidden\'], #product input[type=\'radio\']:checked, #product input[type=\'checkbox\']:checked, #product select, #product textarea'),
+		dataType: 'json',
+		beforeSend: function() {
+			$('#button-cart').button('loading');
+		},
+		complete: function() {
+			$('#button-cart').button('reset');
+		},
+		success: function(json) {
+			$('.alert-dismissible, .text-danger').remove();
+			$('.form-group').removeClass('has-error');
+
+
+			if (json['success']) {
+			    $("input[name='quantity']").val(json['qty']);
+				$('#table-price').show();
+				$('#time-m').html(json['time']+' Jam');
+			    $('#price-m').html(json['price']);
+			     $('#total-harga').html(json['total']);
+			    $("input[name='jumlah']").val(json['qty']);
+			    
+			}
+		},
+        error: function(xhr, ajaxOptions, thrownError) {
+            alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+        }
+	});
+      }
+      </script>
+      {% endif %}
+      ]]></add>
+    </operation>
+  </file>
+  
+  <file path="catalog/controller/checkout/cart.php">
+    <operation>
+      <search><![CDATA[$this->cart->add($this->request->post['product_id'], $quantity, $option, $recurring_id);]]></search>
+      <add position="before"><![CDATA[
+       if ($product_info['price_m'] > 0 && $product_info['time_m'] > 0) {
+      if (isset($this->request->post['panjang'])) {
+				$panjang = (float)$this->request->post['panjang'];
+			} else {
+				$panjang = 0;
+			}
+			
+			if (isset($this->request->post['lebar'])) {
+				$lebar = (float)$this->request->post['lebar'];
+			} else {
+				$lebar = 0;
+			}
+		$total_harga = (($panjang * $lebar) * $product_info['price_m']) * $quantity;
+			$price = (($panjang * $lebar) * $product_info['price_m']);
+			$total_jam = (($panjang * $lebar) * $product_info['time_m']) * $quantity;
+       $this->session->data['hp_change_price'][$product_id] = [
+        'panjang' => $panjang,
+        'lebar' => $lebar,
+        'price' => $price,
+        'waktu' => $total_jam,
+        'total' => $total_harga
+       ];
+       }
+      ]]></add>
+    </operation>
+    <operation>
+      <search><![CDATA[foreach ($product_options as $product_option) {]]></search>
+      <add position="before"><![CDATA[
+       if ($product_info['price_m'] > 0 && $product_info['time_m'] > 0) {
+      if (isset($this->request->post['panjang']) ) {
+				$panjang = (float)$this->request->post['panjang'];
+			} else {
+				$panjang = 0;
+			}
+			
+			if (isset($this->request->post['lebar'])) {
+				$lebar = (float)$this->request->post['lebar'];
+			} else {
+				$lebar = 0;
+			}
+			if ($panjang <= 0) {
+				$json['error']['panjang'] = 'Panjang Required';
+			}
+			if ($lebar <= 0) {
+				$json['error']['lebar'] = 'Lebar Required';
+			}
+		
+       }
+      ]]></add>
+    </operation>
+    </file>
+    <file path="catalog/controller/extension/soconfig/cart.php">
+    <operation>
+      <search><![CDATA[$this->cart->add($this->request->post['product_id'], $quantity, $option, $recurring_id);]]></search>
+      <add position="before"><![CDATA[
+       if ($product_info['price_m'] > 0 && $product_info['time_m'] > 0) {
+      if (isset($this->request->post['panjang'])) {
+				$panjang = (float)$this->request->post['panjang'];
+			} else {
+				$panjang = 0;
+			}
+			
+			if (isset($this->request->post['lebar'])) {
+				$lebar = (float)$this->request->post['lebar'];
+			} else {
+				$lebar = 0;
+			}
+		$total_harga = (($panjang * $lebar) * $product_info['price_m']) * $quantity;
+			$price = (($panjang * $lebar) * $product_info['price_m']);
+			$total_jam = (($panjang * $lebar) * $product_info['time_m']) * $quantity;
+       $this->session->data['hp_change_price'][$product_id] = [
+        'panjang' => $panjang,
+        'lebar' => $lebar,
+        'price' => $price,
+        'waktu' => $total_jam,
+        'total' => $total_harga
+       ];
+       }
+      ]]></add>
+    </operation>
+    <operation>
+      <search><![CDATA[foreach ($product_options as $product_option) {]]></search>
+      <add position="before"><![CDATA[
+       if ($product_info['price_m'] > 0 && $product_info['time_m'] > 0) {
+      if (isset($this->request->post['panjang']) ) {
+				$panjang = (float)$this->request->post['panjang'];
+			} else {
+				$panjang = 0;
+			}
+			
+			if (isset($this->request->post['lebar'])) {
+				$lebar = (float)$this->request->post['lebar'];
+			} else {
+				$lebar = 0;
+			}
+			if ($panjang == 0) {
+				$json['error']['panjang'] = 'Panjang Required';
+			}
+			if ($lebar == 0) {
+				$json['error']['lebar'] = 'Lebar Required';
+			}
+		
+       }
+      ]]></add>
+    </operation>
+    
+    </file>
+    <file path="system/library/cart/cart.php">
+    <operation>
+      <search><![CDATA[$product_data[] = array(]]></search>
+      <add position="before"><![CDATA[
+      if (isset($this->session->data['hp_change_price'][$product_query->row['product_id']])) {
+        $price = $this->session->data['hp_change_price'][$product_query->row['product_id']]['price'];
+      }]]></add>
+    </operation>
+    </file>
+    <file path="catalog/model/checkout/order.php">
+    <operation>
+      <search><![CDATA[foreach ($data['products'] as $product) {]]></search>
+      <add position="after"><![CDATA[
+      if (isset($this->session->data['hp_change_price'][$product['product_id']])) {
+      $change_price = $this->session->data['hp_change_price'][$product['product_id']];
+        $this->db->query("INSERT INTO ".DB_PREFIX."change_price SET order_id = '".(int)$order_id."', product_id = '".$product['product_id']."', panjang = '".(float)$change_price['panjang']."',lebar = '".(float)$change_price['lebar']."',price = '".(float)$change_price['price']."',waktu = '".(float)$change_price['waktu']."',total = '".(float)$change_price['total']."'");
+      }]]></add>
+    </operation>
+    <operation>
+      <search><![CDATA[public function deleteOrder($order_id) {]]></search>
+      <add position="after"><![CDATA[
+      $this->db->query("DELETE FROM `" . DB_PREFIX . "change_price` WHERE order_id = '" . (int)$order_id . "'");
+      ]]></add>
+    </operation>
+    </file>
+    
+    <file path="catalog/controller/common/cart.php">
+    <operation>
+      <search><![CDATA[$data['products'][] = array(]]></search>
+      <add position="before"><![CDATA[
+      if (isset($this->session->data['hp_change_price'][$product['product_id']])) {
+      $change_price = $this->session->data['hp_change_price'][$product['product_id']];
+       $option_data[] = array(
+					'name'  => 'Panjang',
+					'value' => number_format($change_price['panjang'],2).' m',
+					'type'  => 'text'
+				);
+		 $option_data[] = array(
+					'name'  => 'Lebar',
+					'value' => number_format($change_price['lebar'],2).' m',
+					'type'  => 'text'
+				);
+		$option_data[] = array(
+					'name'  => 'Waktu Pengerjaan',
+					'value' => number_format($change_price['waktu']).' Jam',
+					'type'  => 'text'
+				);
+      }]]></add>
+    </operation>
+    </file>
+    <file path="catalog/controller/extension/module/hp_ajax_checkout.php">
+    <operation>
+      <search><![CDATA[$data['products'][] = []]></search>
+      <add position="before"><![CDATA[
+      if (isset($this->session->data['hp_change_price'][$product['product_id']])) {
+      $change_price = $this->session->data['hp_change_price'][$product['product_id']];
+       $option_data[] = array(
+					'name'  => 'Panjang',
+					'value' => number_format($change_price['panjang'],2).' m',
+					'type'  => 'text'
+				);
+		 $option_data[] = array(
+					'name'  => 'Lebar',
+					'value' => number_format($change_price['lebar'],2).' m',
+					'type'  => 'text'
+				);
+		$option_data[] = array(
+					'name'  => 'Waktu Pengerjaan',
+					'value' => number_format($change_price['waktu']).' Jam',
+					'type'  => 'text'
+				);
+      }]]></add>
+    </operation>
+    </file>
+    <file path="catalog/model/account/order.php">
+    <operation>
+      <search><![CDATA[public function getOrder($order_id) {]]></search>
+      <add position="before"><![CDATA[
+       public function getChangePrice($order_id, $product_id) {
+		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "change_price WHERE order_id = '" . (int)$order_id . "' AND product_id = '" . (int)$product_id . "'");
+
+		return $query->row;
+	}
+      ]]></add>
+    </operation>
+    </file>
+    <file path="catalog/controller/account/order.php">
+    <operation>
+      <search><![CDATA[$product_info = $this->model_catalog_product->getProduct($product['product_id']);]]></search>
+      <add position="before"><![CDATA[
+       $change_price = $this->model_account_order->getChangePrice($this->request->get['order_id'], $product['product_id']);
+       if ($change_price) {
+       $option_data[] = array(
+					'name'  => 'Panjang',
+					'value' => number_format($change_price['panjang'],2).' m'
+				);
+		 $option_data[] = array(
+					'name'  => 'Lebar',
+					'value' => number_format($change_price['lebar'],2).' m'
+				);
+		$option_data[] = array(
+					'name'  => 'Waktu Pengerjaan',
+					'value' => number_format($change_price['waktu']).' Jam'
+				);
+       }
+      ]]></add>
+    </operation>
+    </file>
+  
+</modification>

@@ -1004,5 +1004,47 @@
       ]]></add>
     </operation>
     </file>
+    <file path="catalog/controller/jpos/print.php">
+    <operation>
+      <search><![CDATA[if ($order_info) {]]></search>
+      <add position="after"><![CDATA[
+       $data['order_info'] = $order_info;
+       $this->load->model('account/customer_group');
+       $customer_group = $this->model_account_customer_group->getCustomerGroup($order_info['customer_group_id']);
+       $data['customer_group'] = $customer_group ? $customer_group['name'] : '';
+      ]]></add>
+    </operation>
+     <operation>
+      <search><![CDATA[$data['orders'][] = array(]]></search>
+      <add position="after"><![CDATA[
+       'admin_name'        => $order_info['order_posuser_name'],
+       'customer_group'        =>  $customer_group ? $customer_group['name'] : '',
+      ]]></add>
+    </operation>
+    </file>
+    <file path="catalog/view/theme/*/template/jpos/print_receipt.tpl">
+    <operation>
+      <search><![CDATA[<?php echo $text_date_added; ?> <?php echo $order['date_added']; ?>]]></search>
+      <add position="after" offset="1"><![CDATA[
+       Telephone: <?=$order_info['telephone'];?>
+       <br>
+       Customer Group: <?=$customer_group;?>
+       <br>
+       Admin: <?=$order_info['order_posuser_name'];?>
+      ]]></add>
+    </operation>
+    </file>
+    <file path="catalog/view/theme/*/template/jpos/print_invoice.tpl">
+    <operation>
+      <search><![CDATA[<img width="250" src="<?php echo $store_logo; ?>" class="img-responsive"/>]]></search>
+      <add position="after"><![CDATA[
+        <div class="jastore"><br></div>
+        <div class="add"><br><br></div>
+        <div class="tele text-right" style="padding: 3px 30px;font-size: 14px;"><i class="fa fa-phone" aria-hidden="true"></i> <span><?php echo $order['telephone']; ?></span></div>
+        <div class="email text-right" style="padding: 3px 30px;font-size: 14px;"><i class="fa fa-users" aria-hidden="true"></i> <span><?php echo $order['customer_group']; ?></span></div>
+        <div class="web text-right" style="padding: 3px 30px;font-size: 14px;"><i class="fa fa-user" aria-hidden="true"></i> <span><?php echo $order['admin_name']; ?></span></div>
+      ]]></add>
+    </operation>
+    </file>
   
 </modification>

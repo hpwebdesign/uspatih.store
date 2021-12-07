@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<modification>
+  <name>Custom Print</name>
+  <code>CustomPrint</code>
+  <version>1.0.0</version>
+  <author>HP Web Design</author>
+  <link>https://hpwebdesign.id</link>
+  <file path="catalog/view/theme/default/template/jpos/print_receipt.tpl">
+    <operation error="skip">
+      <search trim="true"><![CDATA[</head>]]></search>
+      <add position="before"><![CDATA[
+      <link rel="stylesheet" media="print" href="catalog/view/theme/default/stylesheet/jpos/print.css" />
+      ]]></add>
+    </operation>
+    <operation error="skip">
+      <search trim="true"><![CDATA[<h5 class="text-center"><img src="https://uspatih.store/image/appstore.png" width="50" height="50"><img src="https://uspatih.store/image/playstore.png" width="50" height="50"></h5>]]></search>
+      <add position="replace"><![CDATA[ <h5 class="text-center scan-barcode"><img src="https://uspatih.store/image/appstore.png" width="50" height="50"><img src="https://uspatih.store/image/playstore.png" width="50" height="50"></h5>]]></add>
+    </operation>
+    <operation error="skip">
+      <search trim="true"><![CDATA[<input class="text-center" type="button" value="Print this page" onclick="printPage()" />]]></search>
+      <add position="replace"><![CDATA[
+      <input class="text-center btn-print" type="button" value="Print this page" onclick="printPage()" />
+      ]]></add>
+    </operation>
+  </file>
+</modification>

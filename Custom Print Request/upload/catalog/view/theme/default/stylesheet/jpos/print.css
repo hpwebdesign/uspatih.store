@@ -1,0 +1,37 @@
+@font-face {
+  font-family: 'printer';
+  src: url('printer.ttf')  format('truetype');
+}
+body {
+    color: #000;
+    background-color: #fff;
+    font-family: 'printer';
+    font-size : 12px;
+  }
+  @page
+{
+    size: 3in 5in potrait;
+    margin: 0mm;
+    padding: 0;
+}
+header, footer, aside, nav, form, iframe, .menu, .hero, .adslot {
+  display: none;
+}
+.btn-print, .scan-barcode {
+   display: none; 
+}
+* {
+  background-image: none !important;
+}
+
+img, svg {
+  display: none !important;
+}
+
+img.print, svg.print {
+  display: block;
+  max-width: 100%;
+}
+.table > thead > tr > td {
+    font-size:10px;
+}

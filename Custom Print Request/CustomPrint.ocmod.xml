@@ -22,5 +22,29 @@
       <input class="text-center btn-print" type="button" value="Print this page" onclick="printPage()" />
       ]]></add>
     </operation>
+     <operation error="skip">
+      <search trim="true"><![CDATA[<td><b><?php echo $column_model; ?></b></td>]]></search>
+      <add position="replace"><![CDATA[<td class="column-model"><b><?php echo $column_model; ?></b></td>]]></add>
+    </operation>
+    <operation error="skip">
+      <search trim="true"><![CDATA[<td class="text-right" style="min-width: 85px;"><b><?php echo $column_price; ?></b></td>]]></search>
+      <add position="replace"><![CDATA[<td class="text-right column-price" style="min-width: 85px;"><b><?php echo $column_price; ?></b></td>]]></add>
+    </operation>
+    <operation error="skip">
+      <search trim="true"><![CDATA[<td><?php echo $product['model']; ?></td>]]></search>
+      <add position="replace"><![CDATA[<td class="column-model"><?php echo $product['model']; ?></td>]]></add>
+    </operation>
+     <operation error="skip">
+      <search trim="true"><![CDATA[<td class="text-right"><?php echo $product['price']; ?></td>]]></search>
+      <add position="replace"><![CDATA[<td class="text-right column-price"><?php echo $product['price']; ?></td>]]></add>
+    </operation>
+     <operation error="skip">
+      <search trim="true"><![CDATA[<td colspan="4"><?php echo $total['title']; ?></td>]]></search>
+      <add position="replace"><![CDATA[<td class="total" colspan="4"><?php echo $total['title']; ?></td>]]></add>
+    </operation>
+    <operation error="skip">
+      <search trim="true"><![CDATA[function printPage() {]]></search>
+      <add position="after"><![CDATA[$('.total').attr('colspan',2);]]></add>
+    </operation>
   </file>
 </modification>

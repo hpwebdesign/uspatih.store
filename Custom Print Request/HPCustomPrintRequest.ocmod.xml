@@ -1021,6 +1021,30 @@
        'customer_group'        =>  $customer_group ? $customer_group['name'] : '',
       ]]></add>
     </operation>
+    <operation>
+      <search><![CDATA[$product_data[] = array(]]></search>
+      <add position="before"><![CDATA[
+      $this->load->model('account/order');
+       $change_price = $this->model_account_order->getChangePrice($this->request->get['order_id'], $product['product_id']);
+       if ($change_price) {
+       $option_data[] = array(
+          'name'  => 'Panjang',
+          'value' => number_format($change_price['panjang'],2).' m',
+            'type'  => 'text'
+        );
+     $option_data[] = array(
+          'name'  => 'Lebar',
+          'value' => number_format($change_price['lebar'],2).' m',
+            'type'  => 'text'
+        );
+    $option_data[] = array(
+          'name'  => 'Waktu Pengerjaan',
+          'value' => number_format($change_price['waktu']).' Jam',
+            'type'  => 'text'
+        );
+       }
+      ]]></add>
+    </operation>
     </file>
     <file path="catalog/view/theme/*/template/jpos/print_receipt.tpl">
     <operation>

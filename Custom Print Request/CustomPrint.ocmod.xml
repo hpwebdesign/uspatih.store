@@ -5,11 +5,19 @@
   <version>1.0.0</version>
   <author>HP Web Design</author>
   <link>https://hpwebdesign.id</link>
+  
   <file path="catalog/view/theme/default/template/jpos/print_receipt.tpl">
     <operation error="skip">
       <search trim="true"><![CDATA[</head>]]></search>
       <add position="before"><![CDATA[
       <link rel="stylesheet" media="print" href="catalog/view/theme/default/stylesheet/jpos/print.css" />
+      <style type="text/css">
+       @media screen, print { 
+         body {
+         font-size: 1.5em;
+         }
+       }
+      </style>
       ]]></add>
     </operation>
     <operation error="skip">
@@ -43,8 +51,31 @@
       <add position="replace"><![CDATA[<td class="total" colspan="4"><?php echo $total['title']; ?></td>]]></add>
     </operation>
     <operation error="skip">
+      <search trim="true"><![CDATA[</tfoot>]]></search>
+      <add position="before"><![CDATA[
+       <tr>
+          <td class="total" colspan="4">Anda Mendapatkan Poin</td>
+          <td class="text-right"><?php echo $reward; ?></td> 
+        </tr>
+      ]]></add>
+    </operation>
+    <operation error="skip">
       <search trim="true"><![CDATA[function printPage() {]]></search>
       <add position="after"><![CDATA[$('.total').attr('colspan',2);]]></add>
     </operation>
   </file>
+   <file path="catalog/controller/jpos/print.php">
+    <operation error="skip">
+      <search trim="true"><![CDATA[foreach ($products as $product) {]]></search>
+      <add position="before"><![CDATA[
+      $data['reward'] = 0;
+      ]]></add>
+    </operation>
+    <operation error="skip">
+      <search trim="true"><![CDATA[foreach ($products as $product) {]]></search>
+      <add position="after"><![CDATA[
+      $data['reward'] += $product['reward'];
+      ]]></add>
+    </operation>
+    </file>
 </modification>

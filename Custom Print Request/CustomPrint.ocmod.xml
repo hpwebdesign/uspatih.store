@@ -77,5 +77,11 @@
       $data['reward'] += $product['reward'];
       ]]></add>
     </operation>
+    <operation error="skip">
+      <search trim="true"><![CDATA[$this->response->setOutput($this->jposcatalog->loadView('jpos/print_invoice', $data));]]></search>
+      <add position="replace"><![CDATA[
+      $this->response->setOutput($this->jposcatalog->loadView('jpos/print_invoice_hpwd', $data));
+      ]]></add>
+    </operation>
     </file>
 </modification>
